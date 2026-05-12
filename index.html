@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UK Visa Eligibility Checker — Learn Ready</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue: #1E7FD8;
+    --blue-dark: #1565B0;
+    --blue-light: #EAF4FD;
+    --pink: #E91E8C;
+    --pink-light: #FDE8F4;
+    --orange: #F47C20;
+    --orange-light: #FEF3E8;
+    --dark: #0F1B2D;
+    --mid: #4A5568;
+    --muted: #718096;
+    --border: #E2E8F0;
+    --bg: #F7FAFC;
+    --white: #FFFFFF;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-lg: 0 8px 40px rgba(30,127,216,0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
+
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--blue); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .logo-dot { color: var(--orange); }
+  .logo-badge { background: var(--blue-light); color: var(--blue); font-size: 0.65rem; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'DM Sans', sans-serif; }
+  .header-cta { background: var(--blue); color: white; border: none; padding: 10px 22px; border-radius: 30px; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
+  .header-cta:hover { background: var(--blue-dark); }
+
+  .hero { background: linear-gradient(135deg, #0F1B2D 0%, #1a3255 60%, #1E4F8C 100%); color: white; padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content:''; position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(30,127,216,0.15); }
+  .hero::after { content:''; position:absolute; bottom:-60px; left:-60px; width:240px; height:240px; border-radius:50%; background:rgba(233,30,140,0.10); }
+  .hero-tag { display:inline-block; background:rgba(30,127,216,0.3); border:1px solid rgba(30,127,216,0.5); color:#90C8F8; font-size:0.78rem; font-weight:500; padding:6px 16px; border-radius:30px; margin-bottom:1.5rem; letter-spacing:0.5px; }
+  .hero h1 { font-family:'Syne',sans-serif; font-size:clamp(2rem,5vw,3.2rem); font-weight:800; line-height:1.15; margin-bottom:1.2rem; position:relative; z-index:1; }
+  .hero h1 span { color:#60AFFF; }
+  .hero p { font-size:1.05rem; color:rgba(255,255,255,0.75); max-width:560px; margin:0 auto 2rem; line-height:1.7; position:relative; z-index:1; }
+  .hero-stats { display:flex; justify-content:center; gap:2.5rem; position:relative; z-index:1; }
+  .hero-stat { text-align:center; }
+  .hero-stat strong { display:block; font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; color:white; }
+  .hero-stat span { font-size:0.8rem; color:rgba(255,255,255,0.55); }
+
+  .checker-wrap { max-width: 780px; margin: -2rem auto 4rem; padding: 0 1.5rem; position: relative; z-index: 10; }
+
+  .progress-bar-wrap { background:var(--white); border-radius:var(--radius) var(--radius) 0 0; padding:1.5rem 2rem 1rem; border:1px solid var(--border); border-bottom:none; }
+  .progress-steps { display:flex; align-items:center; }
+  .progress-step { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+  .progress-step:not(:last-child)::after { content:''; position:absolute; top:16px; left:55%; right:-45%; height:2px; background:var(--border); z-index:0; transition:background 0.3s; }
+  .progress-step.done:not(:last-child)::after { background:var(--blue); }
+  .step-dot { width:32px; height:32px; border-radius:50%; background:var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.8rem; position:relative; z-index:1; transition:all 0.3s; font-family:'Syne',sans-serif; }
+  .progress-step.active .step-dot { background:var(--blue); color:white; box-shadow:0 0 0 4px rgba(30,127,216,0.2); }
+  .progress-step.done .step-dot { background:var(--blue); color:white; }
+  .step-label { font-size:0.7rem; color:var(--muted); text-align:center; font-weight:400; white-space:nowrap; }
+  .progress-step.active .step-label { color:var(--blue); font-weight:500; }
+
+  .checker-card { background:var(--white); border:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius); padding:2.5rem 2.5rem 2rem; box-shadow:var(--shadow-lg); }
+  .screen { display:none; animation:fadeIn 0.35s ease; }
+  .screen.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .screen-title { font-family:'Syne',sans-serif; font-size:1.45rem; font-weight:700; color:var(--dark); margin-bottom:0.4rem; }
+  .screen-sub { font-size:0.9rem; color:var(--muted); margin-bottom:2rem; line-height:1.6; }
+
+  .options-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:2rem; }
+  .option-card { border:2px solid var(--border); border-radius:var(--radius-sm); padding:1.1rem 1rem; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; background:var(--white); }
+  .option-card:hover { border-color:var(--blue); background:var(--blue-light); transform:translateY(-2px); }
+  .option-card.selected { border-color:var(--blue); background:var(--blue-light); }
+  .option-icon { font-size:1.8rem; line-height:1; }
+  .option-label { font-size:0.82rem; font-weight:500; color:var(--dark); line-height:1.3; }
+  .option-card.selected .option-label { color:var(--blue-dark); }
+
+  .form-group { margin-bottom:1.4rem; }
+  .form-label { display:block; font-size:0.88rem; font-weight:500; color:var(--dark); margin-bottom:8px; }
+  .form-select { width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--dark); background:var(--white); transition:border 0.2s; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+  .form-select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,127,216,0.12); }
+
+  .radio-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.4rem; }
+  .radio-pill input { display:none; }
+  .radio-pill label { display:inline-block; padding:9px 18px; border:1.5px solid var(--border); border-radius:30px; font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.2s; color:var(--mid); }
+  .radio-pill input:checked + label { background:var(--blue); border-color:var(--blue); color:white; }
+  .radio-pill label:hover { border-color:var(--blue); color:var(--blue); }
+
+  .btn-row { display:flex; gap:12px; justify-content:flex-end; margin-top:1.5rem; }
+  .btn-back { padding:12px 24px; border:1.5px solid var(--border); border-radius:30px; background:white; color:var(--mid); font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .btn-back:hover { border-color:var(--muted); color:var(--dark); }
+  .btn-next { padding:12px 32px; border:none; border-radius:30px; background:var(--blue); color:white; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .btn-next:hover { background:var(--blue-dark); transform:translateY(-1px); }
+  .btn-next:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; transform:none; }
+
+  .loading-screen { text-align:center; padding:3rem 1rem; }
+  .loading-ring { width:64px; height:64px; border-radius:50%; border:4px solid var(--blue-light); border-top-color:var(--blue); animation:spin 0.9s linear infinite; margin:0 auto 1.5rem; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-step { font-size:0.85rem; color:var(--muted); padding:6px 0; opacity:0; transition:opacity 0.4s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .loading-step.visible { opacity:1; color:var(--blue); }
+  .loading-step.done { opacity:1; color:#22c55e; }
+
+  .result-header { background:linear-gradient(135deg,#0F1B2D,#1a3255); border-radius:var(--radius-sm); padding:2rem; color:white; text-align:center; margin:-2.5rem -2.5rem 2rem; }
+  .result-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:30px; font-size:0.8rem; font-weight:600; margin-bottom:1rem; }
+  .result-badge.eligible { background:rgba(34,197,94,0.2); color:#86efac; border:1px solid rgba(34,197,94,0.3); }
+  .result-badge.likely { background:rgba(251,191,36,0.2); color:#fde68a; border:1px solid rgba(251,191,36,0.3); }
+  .result-badge.unlikely { background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+  .result-visa-name { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; margin-bottom:0.5rem; }
+  .result-visa-code { font-size:0.85rem; color:rgba(255,255,255,0.55); }
+
+  .result-section { margin-bottom:1.8rem; }
+  .result-section-title { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); margin-bottom:1rem; display:flex; align-items:center; gap:8px; }
+  .result-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .req-list { display:flex; flex-direction:column; gap:10px; }
+  .req-item { display:flex; align-items:flex-start; gap:12px; padding:12px 14px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); }
+  .req-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; flex-shrink:0; margin-top:1px; }
+  .req-icon.met { background:#dcfce7; color:#16a34a; }
+  .req-icon.check { background:var(--blue-light); color:var(--blue); }
+  .req-icon.warn { background:#fef9c3; color:#ca8a04; }
+  .req-text { font-size:0.88rem; color:var(--dark); line-height:1.5; }
+  .req-text strong { font-weight:600; display:block; margin-bottom:2px; }
+  .req-text span { color:var(--muted); }
+
+  .timeline-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:1rem; }
+  .timeline-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem; text-align:center; }
+  .timeline-card .t-label { font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+  .timeline-card .t-value { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:700; color:var(--blue); }
+  .timeline-card .t-sub { font-size:0.72rem; color:var(--muted); margin-top:2px; }
+
+  .next-steps { display:flex; flex-direction:column; gap:10px; }
+  .next-step { display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--white); transition:all 0.2s; }
+  .next-step:hover { border-color:var(--blue); transform:translateX(4px); }
+  .step-num { width:32px; height:32px; border-radius:50%; background:var(--blue); color:white; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:0.8rem; font-weight:700; flex-shrink:0; }
+  .step-info { flex:1; }
+  .step-info strong { display:block; font-size:0.88rem; font-weight:600; color:var(--dark); }
+  .step-info span { font-size:0.8rem; color:var(--muted); }
+
+  .ai-response { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1.2rem 1.4rem; font-size:0.9rem; line-height:1.7; color:var(--dark); margin-top:1rem; }
+  .ai-label { display:flex; align-items:center; gap:8px; font-size:0.78rem; font-weight:600; color:var(--blue); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
+  .ai-dot { width:8px; height:8px; background:var(--blue); border-radius:50%; animation:pulse 1.5s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  .cta-box { background:linear-gradient(135deg,var(--blue) 0%,#1565B0 100%); border-radius:var(--radius-sm); padding:1.8rem; color:white; text-align:center; margin-top:2rem; }
+  .cta-box h3 { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:0.5rem; }
+  .cta-box p { font-size:0.88rem; opacity:0.85; margin-bottom:1.2rem; }
+  .cta-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .cta-btn-white { background:white; color:var(--blue); border:none; padding:11px 22px; border-radius:30px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; transition:all 0.2s; }
+  .cta-btn-white:hover { transform:translateY(-2px); }
+  .cta-btn-outline { background:transparent; color:white; border:1.5px solid rgba(255,255,255,0.5); padding:11px 22px; border-radius:30px; font-family:'DM Sans',sans-serif; font-weight:500; font-size:0.88rem; cursor:pointer; transition:all 0.2s; }
+  .cta-btn-outline:hover { border-color:white; }
+
+  .restart-btn { display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.85rem; cursor:pointer; padding:8px 0; transition:color 0.2s; }
+  .restart-btn:hover { color:var(--blue); }
+
+  footer { text-align:center; padding:2rem; color:var(--muted); font-size:0.8rem; border-top:1px solid var(--border); background:var(--white); }
+  footer a { color:var(--blue); text-decoration:none; }
+
+  @media(max-width:600px) {
+    .checker-card { padding:1.5rem 1.2rem; }
+    .hero { padding:3.5rem 1.2rem 3rem; }
+    .hero-stats { gap:1.5rem; }
+    .result-header { margin:-1.5rem -1.2rem 1.5rem; }
+    .timeline-row { grid-template-columns:1fr; }
+    .options-grid { grid-template-columns:repeat(2,1fr); }
+    .step-label { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Learn<span class="logo-dot">Ready</span><span class="logo-badge">AI Tools</span></div>
+  <button class="header-cta">Book a Consultation</button>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">✦ Free AI-Powered Tool — No Sign Up Required</div>
+  <h1>Find Your Perfect<br/><span>UK Visa in Minutes</span></h1>
+  <p>Answer a few simple questions and our AI will identify which UK visa you qualify for, what documents you need, and exactly what to do next.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>12+</strong><span>Visa types covered</span></div>
+    <div class="hero-stat"><strong>3 mins</strong><span>Average completion</span></div>
+    <div class="hero-stat"><strong>Free</strong><span>Always & forever</span></div>
+  </div>
+</div>
+
+<div class="checker-wrap">
+  <div class="progress-bar-wrap">
+    <div class="progress-steps">
+      <div class="progress-step active" id="ps1"><div class="step-dot">1</div><div class="step-label">Purpose</div></div>
+      <div class="progress-step" id="ps2"><div class="step-dot">2</div><div class="step-label">Background</div></div>
+      <div class="progress-step" id="ps3"><div class="step-dot">3</div><div class="step-label">Finances</div></div>
+      <div class="progress-step" id="ps4"><div class="step-dot">4</div><div class="step-label">Details</div></div>
+      <div class="progress-step" id="ps5"><div class="step-dot">5</div><div class="step-label">Result</div></div>
+    </div>
+  </div>
+
+  <div class="checker-card">
+
+    <!-- SCREEN 1 -->
+    <div class="screen active" id="screen1">
+      <div class="screen-title">Why do you want to go to the UK? 🇬🇧</div>
+      <div class="screen-sub">Select the option that best describes your main reason for travelling.</div>
+      <div class="options-grid" id="purposeGrid">
+        <div class="option-card" data-value="study" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">🎓</div><div class="option-label">Study / University</div></div>
+        <div class="option-card" data-value="work" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">💼</div><div class="option-label">Work / Employment</div></div>
+        <div class="option-card" data-value="visit" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">✈️</div><div class="option-label">Tourism / Visit</div></div>
+        <div class="option-card" data-value="family" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">👨‍👩‍👧</div><div class="option-label">Join Family</div></div>
+        <div class="option-card" data-value="business" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">🤝</div><div class="option-label">Business / Meetings</div></div>
+        <div class="option-card" data-value="medical" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">🏥</div><div class="option-label">Medical Treatment</div></div>
+        <div class="option-card" data-value="graduate" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">🚀</div><div class="option-label">Graduate Work</div></div>
+        <div class="option-card" data-value="other" onclick="selectOption(this,'purposeGrid','purpose')"><div class="option-icon">💡</div><div class="option-label">Something Else</div></div>
+      </div>
+      <div class="btn-row"><button class="btn-next" id="btn1" disabled onclick="goTo(2)">Continue →</button></div>
+    </div>
+
+    <!-- SCREEN 2 -->
+    <div class="screen" id="screen2">
+      <div class="screen-title">Tell us about yourself</div>
+      <div class="screen-sub">This helps us check your eligibility accurately.</div>
+      <div class="form-group">
+        <label class="form-label">What is your nationality / country of passport?</label>
+        <select class="form-select" id="nationality" onchange="answers.nationality=this.value;checkScreen2()">
+          <option value="">Select your country...</option>
+          <option value="NG">Nigeria 🇳🇬</option>
+          <option value="GH">Ghana 🇬🇭</option>
+          <option value="KE">Kenya 🇰🇪</option>
+          <option value="ZA">South Africa 🇿🇦</option>
+          <option value="IN">India 🇮🇳</option>
+          <option value="PK">Pakistan 🇵🇰</option>
+          <option value="PH">Philippines 🇵🇭</option>
+          <option value="US">United States 🇺🇸</option>
+          <option value="CN">China 🇨🇳</option>
+          <option value="BR">Brazil 🇧🇷</option>
+          <option value="EU">European Union</option>
+          <option value="OTHER">Other Country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">What is your current age?</label>
+        <select class="form-select" id="age" onchange="answers.age=this.value;checkScreen2()">
+          <option value="">Select age range...</option>
+          <option value="under18">Under 18</option>
+          <option value="18-25">18 – 25</option>
+          <option value="26-35">26 – 35</option>
+          <option value="36-50">36 – 50</option>
+          <option value="50+">Over 50</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Do you currently have valid UK immigration status?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="status" id="s1" value="none" onchange="answers.currentStatus=this.value;checkScreen2()"><label for="s1">No, never been</label></div>
+          <div class="radio-pill"><input type="radio" name="status" id="s2" value="visited" onchange="answers.currentStatus=this.value;checkScreen2()"><label for="s2">Visited before</label></div>
+          <div class="radio-pill"><input type="radio" name="status" id="s3" value="current" onchange="answers.currentStatus=this.value;checkScreen2()"><label for="s3">Currently in UK</label></div>
+          <div class="radio-pill"><input type="radio" name="status" id="s4" value="expired" onchange="answers.currentStatus=this.value;checkScreen2()"><label for="s4">Had visa (expired)</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Have you ever been refused a UK visa?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="refused" id="r1" value="no" onchange="answers.refused=this.value;checkScreen2()"><label for="r1">No</label></div>
+          <div class="radio-pill"><input type="radio" name="refused" id="r2" value="yes" onchange="answers.refused=this.value;checkScreen2()"><label for="r2">Yes, once</label></div>
+          <div class="radio-pill"><input type="radio" name="refused" id="r3" value="multiple" onchange="answers.refused=this.value;checkScreen2()"><label for="r3">Yes, multiple times</label></div>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn-back" onclick="goTo(1)">← Back</button><button class="btn-next" id="btn2" disabled onclick="goTo(3)">Continue →</button></div>
+    </div>
+
+    <!-- SCREEN 3 -->
+    <div class="screen" id="screen3">
+      <div class="screen-title">Financial Information 💰</div>
+      <div class="screen-sub">UK visa applications require proof of finances. Let's check your situation.</div>
+      <div class="form-group">
+        <label class="form-label">Approximately how much do you have in savings? (GBP £)</label>
+        <select class="form-select" id="savings" onchange="answers.savings=this.value;checkScreen3()">
+          <option value="">Select amount...</option>
+          <option value="under1k">Under £1,000</option>
+          <option value="1k-5k">£1,000 – £5,000</option>
+          <option value="5k-10k">£5,000 – £10,000</option>
+          <option value="10k-20k">£10,000 – £20,000</option>
+          <option value="20k+">£20,000 or more</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Will you have a sponsor?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="sponsor" id="sp1" value="self" onchange="answers.sponsor=this.value;checkScreen3()"><label for="sp1">Self-funded</label></div>
+          <div class="radio-pill"><input type="radio" name="sponsor" id="sp2" value="family" onchange="answers.sponsor=this.value;checkScreen3()"><label for="sp2">Family sponsor</label></div>
+          <div class="radio-pill"><input type="radio" name="sponsor" id="sp3" value="employer" onchange="answers.sponsor=this.value;checkScreen3()"><label for="sp3">UK Employer</label></div>
+          <div class="radio-pill"><input type="radio" name="sponsor" id="sp4" value="school" onchange="answers.sponsor=this.value;checkScreen3()"><label for="sp4">UK University</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Do you have a confirmed job offer or university admission in the UK?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="offer" id="o1" value="yes_job" onchange="answers.offer=this.value;checkScreen3()"><label for="o1">Yes – job offer</label></div>
+          <div class="radio-pill"><input type="radio" name="offer" id="o2" value="yes_uni" onchange="answers.offer=this.value;checkScreen3()"><label for="o2">Yes – university offer</label></div>
+          <div class="radio-pill"><input type="radio" name="offer" id="o3" value="no" onchange="answers.offer=this.value;checkScreen3()"><label for="o3">Not yet</label></div>
+          <div class="radio-pill"><input type="radio" name="offer" id="o4" value="na" onchange="answers.offer=this.value;checkScreen3()"><label for="o4">Not applicable</label></div>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn-back" onclick="goTo(2)">← Back</button><button class="btn-next" id="btn3" disabled onclick="goTo(4)">Continue →</button></div>
+    </div>
+
+    <!-- SCREEN 4 -->
+    <div class="screen" id="screen4">
+      <div class="screen-title">A few more details ✍️</div>
+      <div class="screen-sub">Almost there — these final questions help us personalise your result.</div>
+      <div class="form-group">
+        <label class="form-label">What is your highest level of education?</label>
+        <select class="form-select" id="education" onchange="answers.education=this.value;checkScreen4()">
+          <option value="">Select education level...</option>
+          <option value="secondary">Secondary / High School (WAEC/NECO)</option>
+          <option value="diploma">Diploma / HND</option>
+          <option value="bachelors">Bachelor's Degree</option>
+          <option value="masters">Master's Degree</option>
+          <option value="phd">PhD / Doctorate</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">How long do you intend to stay in the UK?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="duration" id="d1" value="short" onchange="answers.duration=this.value;checkScreen4()"><label for="d1">Under 6 months</label></div>
+          <div class="radio-pill"><input type="radio" name="duration" id="d2" value="1-3years" onchange="answers.duration=this.value;checkScreen4()"><label for="d2">1–3 years</label></div>
+          <div class="radio-pill"><input type="radio" name="duration" id="d3" value="3-5years" onchange="answers.duration=this.value;checkScreen4()"><label for="d3">3–5 years</label></div>
+          <div class="radio-pill"><input type="radio" name="duration" id="d4" value="permanent" onchange="answers.duration=this.value;checkScreen4()"><label for="d4">Long-term / Permanently</label></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Do you have a valid passport?</label>
+        <div class="radio-row">
+          <div class="radio-pill"><input type="radio" name="passport" id="pp1" value="yes" onchange="answers.passport=this.value;checkScreen4()"><label for="pp1">Yes, valid</label></div>
+          <div class="radio-pill"><input type="radio" name="passport" id="pp2" value="expired" onchange="answers.passport=this.value;checkScreen4()"><label for="pp2">Expired</label></div>
+          <div class="radio-pill"><input type="radio" name="passport" id="pp3" value="no" onchange="answers.passport=this.value;checkScreen4()"><label for="pp3">No passport yet</label></div>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn-back" onclick="goTo(3)">← Back</button><button class="btn-next" id="btn4" disabled onclick="runAI()">Check My Eligibility →</button></div>
+    </div>
+
+    <!-- SCREEN 5: LOADING -->
+    <div class="screen" id="screen5">
+      <div class="loading-screen">
+        <div class="loading-ring"></div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:0.5rem;">Analysing Your Application...</div>
+        <div style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem;">Our AI is reviewing UK Home Office requirements</div>
+        <div id="loadingSteps">
+          <div class="loading-step" id="ls1">🔍 Checking nationality requirements...</div>
+          <div class="loading-step" id="ls2">📋 Matching visa categories...</div>
+          <div class="loading-step" id="ls3">💰 Verifying financial thresholds...</div>
+          <div class="loading-step" id="ls4">📝 Generating document checklist...</div>
+          <div class="loading-step" id="ls5">✅ Preparing your personalised result...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: RESULT -->
+    <div class="screen" id="screen6"><div id="resultContent"></div></div>
+
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 <strong>Learn Ready</strong> — UK Immigration Guidance Platform</p>
+  <p style="margin-top:6px;">This tool provides general guidance only and is not legal advice. For a full case review, <a href="#">book a consultation</a> with our certified advisors.</p>
+</footer>
+
+<script>
+const answers = {};
+let currentScreen = 1;
+
+function selectOption(el, gridId, key) {
+  document.querySelectorAll('#' + gridId + ' .option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[key] = el.dataset.value;
+  document.getElementById('btn1').disabled = false;
+}
+
+function checkScreen2() {
+  document.getElementById('btn2').disabled = !(answers.nationality && answers.age && answers.currentStatus && answers.refused);
+}
+function checkScreen3() {
+  document.getElementById('btn3').disabled = !(answers.savings && answers.sponsor && answers.offer);
+}
+function checkScreen4() {
+  document.getElementById('btn4').disabled = !(answers.education && answers.duration && answers.passport);
+}
+
+function goTo(n) {
+  document.getElementById('screen' + currentScreen).classList.remove('active');
+  document.getElementById('screen' + n).classList.add('active');
+  for (let i = 1; i <= 5; i++) {
+    const ps = document.getElementById('ps' + i);
+    ps.classList.remove('active','done');
+    if (i < n) ps.classList.add('done');
+    if (i === n) ps.classList.add('active');
+  }
+  currentScreen = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function runAI() {
+  goTo(5);
+  let step = 0;
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  function showStep() {
+    if (step > 0) {
+      const prev = document.getElementById(steps[step-1]);
+      prev.classList.remove('visible'); prev.classList.add('done');
+      prev.textContent = '✓ ' + prev.textContent.replace(/^.\s/, '');
+    }
+    if (step < steps.length) {
+      document.getElementById(steps[step]).classList.add('visible');
+      step++;
+      setTimeout(showStep, 900);
+    } else {
+      setTimeout(fetchAIResult, 600);
+    }
+  }
+  showStep();
+}
+
+async function fetchAIResult() {
+  const purposeMap = {study:'Study at UK university/college',work:'Work in UK with employer',visit:'Visit UK as tourist',family:'Join family members in UK',business:'Business meetings/short-term',medical:'Medical treatment',graduate:'Post-study Graduate work visa',other:'Other purpose'};
+  const countryMap = {NG:'Nigeria',GH:'Ghana',KE:'Kenya',ZA:'South Africa',IN:'India',PK:'Pakistan',PH:'Philippines',US:'United States',CN:'China',BR:'Brazil',EU:'European Union country',OTHER:'Other country'};
+
+  const prompt = `Assess UK visa eligibility for:
+- Purpose: ${purposeMap[answers.purpose]||answers.purpose}
+- Nationality: ${countryMap[answers.nationality]||answers.nationality}
+- Age: ${answers.age}
+- Current UK status: ${answers.currentStatus}
+- Previous refusals: ${answers.refused}
+- Savings (GBP): ${answers.savings}
+- Sponsor: ${answers.sponsor}
+- Job/University offer: ${answers.offer}
+- Education: ${answers.education}
+- Intended stay: ${answers.duration}
+- Valid passport: ${answers.passport}`;
+
+  try {
+    const res = await fetch('/api/check-eligibility', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!res.ok) throw new Error('API error: ' + res.status);
+    const data = await res.json();
+    showResult(data);
+  } catch(e) {
+    console.error('Eligibility check failed:', e);
+    showFallbackResult();
+  }
+}
+
+function showResult(r) {
+  const bc = r.eligibility === 'eligible' ? 'eligible' : r.eligibility === 'likely' ? 'likely' : 'unlikely';
+  const bt = r.eligibility === 'eligible' ? '✓ Likely Eligible' : r.eligibility === 'likely' ? '~ Probably Eligible' : '⚠ May Face Challenges';
+
+  const reqHTML = (r.requirements||[]).map(req => `
+    <div class="req-item">
+      <div class="req-icon ${req.status}">${req.status==='met'?'✓':req.status==='warn'?'!':'→'}</div>
+      <div class="req-text"><strong>${req.title}</strong><span>${req.detail}</span></div>
+    </div>`).join('');
+
+  const stepsHTML = (r.next_steps||[]).map((s,i) => `
+    <div class="next-step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-info"><strong>${s.title}</strong><span>${s.detail}</span></div>
+      <span style="color:var(--blue);font-size:1.2rem;">›</span>
+    </div>`).join('');
+
+  const warnHTML = r.warning ? `<div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:1.1rem;flex-shrink:0">⚠️</span><p style="font-size:0.87rem;color:#92400e;line-height:1.6;">${r.warning}</p></div>` : '';
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="result-header">
+      <div class="result-badge ${bc}">${bt}</div>
+      <div class="result-visa-name">${r.visa_name}</div>
+      <div class="result-visa-code">${r.visa_code}</div>
+    </div>
+    ${warnHTML}
+    <div class="ai-response">
+      <div class="ai-label"><div class="ai-dot"></div> AI Assessment</div>
+      ${r.summary}
+    </div>
+    <div style="margin-top:2rem;">
+      <div class="timeline-row">
+        <div class="timeline-card"><div class="t-label">Processing Time</div><div class="t-value">${r.processing_days}</div><div class="t-sub">working days</div></div>
+        <div class="timeline-card"><div class="t-label">Application Fee</div><div class="t-value">${r.fee_gbp}</div><div class="t-sub">approx.</div></div>
+        <div class="timeline-card"><div class="t-label">NHS Surcharge</div><div class="t-value" style="font-size:0.8rem;color:var(--mid);line-height:1.4;">${r.ihs_note}</div></div>
+      </div>
+    </div>
+    <div class="result-section">
+      <div class="result-section-title">Eligibility Requirements</div>
+      <div class="req-list">${reqHTML}</div>
+    </div>
+    <div class="result-section">
+      <div class="result-section-title">Your Next Steps</div>
+      <div class="next-steps">${stepsHTML}</div>
+    </div>
+    <div class="cta-box">
+      <h3>Want Expert Help With Your Application?</h3>
+      <p>Our certified immigration advisors review your full case and guide you step-by-step to approval.</p>
+      <div class="cta-btns">
+        <button class="cta-btn-white">📅 Book Free Consultation</button>
+        <button class="cta-btn-outline">📋 Get Document Checklist</button>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;display:flex;justify-content:center;">
+      <button class="restart-btn" onclick="restartChecker()">↩ Start Over / Check a Different Visa</button>
+    </div>`;
+
+  goTo(6);
+  document.getElementById('ps5').classList.remove('active');
+  document.getElementById('ps5').classList.add('done');
+}
+
+function showFallbackResult() {
+  document.getElementById('resultContent').innerHTML = `
+    <div style="text-align:center;padding:2rem 1rem;">
+      <div style="font-size:2rem;margin-bottom:1rem;">⚠️</div>
+      <div class="screen-title" style="text-align:center;margin-bottom:0.5rem;">Unable to connect right now</div>
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;">There was an issue connecting to the AI. Please try again or speak with an advisor.</p>
+      <button class="btn-next" style="margin:0 auto;display:flex;" onclick="restartChecker()">Try Again</button>
+    </div>`;
+  goTo(6);
+}
+
+function restartChecker() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('select').forEach(s => s.value = '');
+  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+  document.querySelectorAll('.loading-step').forEach(s => { s.classList.remove('visible','done'); });
+  const stepTexts = ['🔍 Checking nationality requirements...','📋 Matching visa categories...','💰 Verifying financial thresholds...','📝 Generating document checklist...','✅ Preparing your personalised result...'];
+  document.querySelectorAll('.loading-step').forEach((s,i) => s.textContent = stepTexts[i]);
+  ['btn1','btn2','btn3','btn4'].forEach(b => document.getElementById(b).disabled = true);
+  goTo(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
