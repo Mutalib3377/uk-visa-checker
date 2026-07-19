@@ -34,9 +34,8 @@
     display: flex; align-items: center; justify-content: space-between;
     height: 68px; position: sticky; top: 0; z-index: 100;
   }
-  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--blue); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-  .logo-dot { color: var(--orange); }
-  .logo-badge { background: var(--blue-light); color: var(--blue); font-size: 0.65rem; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'DM Sans', sans-serif; }
+  .logo { display: inline-flex; align-items: center; }
+  .logo img { display: block; height: 38px; width: auto; }
   .header-cta { background: var(--blue); color: white; border: none; padding: 10px 22px; border-radius: 30px; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
   .header-cta:hover { background: var(--blue-dark); }
 
@@ -52,7 +51,9 @@
   .hero-stat strong { display:block; font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; color:white; }
   .hero-stat span { font-size:0.8rem; color:rgba(255,255,255,0.55); }
 
-  .checker-wrap { max-width: 780px; margin: -2rem auto 4rem; padding: 0 1.5rem; position: relative; z-index: 10; }
+  .checker-section { background: var(--white); padding: 0 0 4rem; }
+  .checker-wrap { width: 100%; margin: -2rem 0 0; position: relative; z-index: 10; }
+  .checker-inner { max-width: 980px; margin: 0 auto; padding: 0 1rem; }
 
   .progress-bar-wrap { background:var(--white); border-radius:var(--radius) var(--radius) 0 0; padding:1.5rem 2rem 1rem; border:1px solid var(--border); border-bottom:none; }
   .progress-steps { display:flex; align-items:center; }
@@ -165,17 +166,28 @@
     .checker-card { padding:1.5rem 1.2rem; }
     .hero { padding:3.5rem 1.2rem 3rem; }
     .hero-stats { gap:1.5rem; }
+    .checker-section { padding-bottom: 3rem; }
     .result-header { margin:-1.5rem -1.2rem 1.5rem; }
     .timeline-row { grid-template-columns:1fr; }
     .options-grid { grid-template-columns:repeat(2,1fr); }
     .step-label { display:none; }
+  }
+
+  @media(min-width:640px) {
+    .checker-inner { padding: 0 1.5rem; }
+  }
+
+  @media(min-width:1024px) {
+    .checker-inner { max-width: 1080px; padding: 0 2rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Learn<span class="logo-dot">Ready</span><span class="logo-badge">AI Tools</span></div>
+  <a class="logo" href="https://learn-ready.com/" target="_blank" rel="noopener" aria-label="Learn Ready home">
+    <img src="assets/learn-ready-logo.webp" alt="Learn Ready"/>
+  </a>
   <button class="header-cta">Book a Consultation</button>
 </header>
 
@@ -190,7 +202,9 @@
   </div>
 </div>
 
+<div class="checker-section">
 <div class="checker-wrap">
+  <div class="checker-inner">
   <div class="progress-bar-wrap">
     <div class="progress-steps">
       <div class="progress-step active" id="ps1"><div class="step-dot">1</div><div class="step-label">Purpose</div></div>
@@ -364,6 +378,8 @@
     <div class="screen" id="screen6"><div id="resultContent"></div></div>
 
   </div>
+  </div>
+</div>
 </div>
 
 <footer>
